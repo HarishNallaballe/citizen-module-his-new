@@ -1,0 +1,49 @@
+spring:
+  cloud:
+    openfeign:
+       circuitbreaker:
+          enabled : true  #activating circuit breaker to all feign clients
+  application:
+    name: citizens
+  datasource:
+         password: root
+         url: jdbc:mysql://43.205.101.87:3309/citizendb
+         username: root
+  jpa:
+     hibernate:
+        ddl-auto: update
+     show-sql: true
+    
+server:
+   port : 1004
+eureka:
+  client:
+    service-url:
+      defaultZone: http://43.205.101.87:8761/eureka/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10    #take 10 request starting which are cominging to plan microservice 
+        #if requests successfully processed go on otherwise  move to open state
+        permitted-number-of-calls-in-half-open-state: 2
+        # in half open state i am telling to my service process 2 req if succesfull move to close state otherwise open state 
+        failure-rate-threshold: 50
+        #if atleast 50% of my req are failed, then my circuit breaker moved to open from the closed state
+        wait-duration-in-open-state: 10000
+         #it waits 10s to move to the half open state
+
+resilience4j.circuitbreaker:
+  instances:
+    hello-world:
+      sliding-window-size: 10
+      registerHealthIndicator: true
+      permitted-number-of-calls-in-half-open-state: 2
+      waitDurationInOpenState: 30s
+      failureRateThreshold: 60
